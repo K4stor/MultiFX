@@ -14,6 +14,10 @@
 const int presetButtonPin = 8;
 const int param1ButtonPin = 7;
 
+#define MAX_PRESET_ENCODER_VALUE 31
+#define MAX_PARAMETER_ENCODER_VALUE 127
+#define MAX_PROGRAM_ENCODER_VALUE 7
+
 // Button states  HIGH means NOT pressed down.
 int param1ButtonState = HIGH;
 int presetButtonState = HIGH;
@@ -62,8 +66,7 @@ enum Event {
   pressParam1,
   longPressPreset,
   longPressPresetWithParam1Pressed,
-  loaded,
-  saved,
+  operationFinished,
   timer
 };
 
@@ -129,10 +132,10 @@ struct Transition transitions[] = {
     {editParameter3, pressParam1, start, transitionToStart},
 
     // branching from openSelectedPreset
-    {openSelectedPreset, loaded, start, transitionToStart},
+    {openSelectedPreset, operationFinished, start, transitionToStart},
 
     // branching from saveSelectedPreset
-    {saveSelectedPreset, saved, start, transitionToStart},
+    {saveSelectedPreset, operationFinished, start, transitionToStart},
 
     // branching from editProgram
     {editProgram, turnPresetWithParam1Pressed, editProgram, updateProgram},
@@ -144,8 +147,8 @@ struct Transition transitions[] = {
     {editMidiMapping, pressParam1, restoreMidiMapping, resetEditedMidiMapping},
     {editMidiMapping, longPressPreset, saveMidiMapping, saveEditedMidiMapping},
 
-    {restoreMidiMapping, loaded, start, transitionToStart},
-    {saveMidiMapping, saved, start, transitionToStart}
+    {restoreMidiMapping, operationFinished, start, transitionToStart},
+    {saveMidiMapping, operationFinished, start, transitionToStart}
 };
 
 State currentState = start;
@@ -256,8 +259,8 @@ void setupEncoders() {
   switches.setEncoder(1, param1Encoder);
 
   muteEvents = true;
-  switches.changeEncoderPrecision(0, 32, 1);
-  switches.changeEncoderPrecision(1, 127, 0);
+  switches.changeEncoderPrecision(0, MAX_PRESET_ENCODER_VALUE, 0);
+  switches.changeEncoderPrecision(1, MAX_PARAMETER_ENCODER_VALUE, 0);
   muteEvents = false;
 }
 
@@ -289,7 +292,7 @@ void transitionToOpenPreset() {
   dotIndex = DI_NONE;
   startBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(32, currentPresetNumber);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
   muteEvents = false;
   drawNumber(currentPresetNumber);
 }
@@ -304,13 +307,13 @@ void openSelected() {
   stopBlink();
   showDone();
   delay(200);
-  handleEvent(loaded);
+  handleEvent(operationFinished);
 }
 
 void transitionToStart() {
   dotIndex = DI_NONE;
   muteEvents = true;
-  presetEncoder->changePrecision(32, currentPresetNumber);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
   muteEvents = false;
   drawNumber(currentPresetNumber);
 }
@@ -319,7 +322,7 @@ void transitionToEditParam1() {
   dotIndex = DI_FIRST;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(127, currentPreset.param1);
+  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param1);
   muteEvents = false;
   drawNumber(currentPreset.param1);
 }
@@ -328,7 +331,7 @@ void transitionToEditParam2() {
   dotIndex = DI_SECOND;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(127, currentPreset.param2);
+  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param2);
   muteEvents = false;
   drawNumber(currentPreset.param2);
 }
@@ -337,7 +340,7 @@ void transitionToEditParam3() {
   dotIndex = DI_THIRD;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(127, currentPreset.param3);
+  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param3);
   muteEvents = false;
   drawNumber(currentPreset.param3);
 }
@@ -361,7 +364,7 @@ void transitionToSavePreset() {
   dotIndex = DI_NONE;
   startBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(32, currentPresetNumber);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
   muteEvents = false;
 
   drawNumber(currentPresetNumber);
@@ -377,45 +380,54 @@ void saveSelected() {
   stopBlink();
   showDone();
   delay(200);
-  handleEvent(saved);
+  handleEvent(operationFinished);
 }
 
 void transitionToEditProgram() {
   dotIndex = DI_FOURTH;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(8, currentPreset.program);
+  presetEncoder->changePrecision(MAX_PROGRAM_ENCODER_VALUE, currentPreset.program);
   muteEvents = false;
-  drawNumber(currentPreset.program);
+  drawNumber(currentPreset.program + 1);
 }
 
 void updateProgram() {
   currentPreset.program = presetEncoderValue;
-  drawNumber(currentPreset.program);
+  drawNumber(currentPreset.program + 1);
 }
 
 void transitionToEditMidiMapping() {
+  currentMidiMappingIndex = 1;
   dotIndex = DI_NONE;
   muteEvents = true;
-  param1Encoder->changePrecision(32, currentMidiMappingIndex);
-  presetEncoder->changePrecision(32, midiMap[currentMidiMappingIndex]);
+  param1Encoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentMidiMappingIndex);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, midiMap[currentMidiMappingIndex]);
   muteEvents = false;
+  drawTwoBytes(currentMidiMappingIndex + 1, midiMap[currentMidiMappingIndex] + 1);
 }
 
 void saveEditedMidiMapping() {
+  hideColon();
   saveMidiMap();
+  handleEvent(operationFinished);
 }
 
 void resetEditedMidiMapping() {
+  hideColon();
   restoreMidiMap();
+  handleEvent(operationFinished);
 }
 
 void updateMidiFromParameter() {
   currentMidiMappingIndex = param1EncoderValue;
-  drawTwoBytes(currentMidiMappingIndex, midiMap[currentMidiMappingIndex]);
+  muteEvents = true;
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, midiMap[currentMidiMappingIndex]);
+  muteEvents = false; 
+  drawTwoBytes(currentMidiMappingIndex + 1, midiMap[currentMidiMappingIndex] + 1);
 }
 
 void updateMidiToParameter() {
   midiMap[currentMidiMappingIndex] = presetEncoderValue; 
-  drawTwoBytes(currentMidiMappingIndex, midiMap[currentMidiMappingIndex]);
+  drawTwoBytes(currentMidiMappingIndex + 1, midiMap[currentMidiMappingIndex] + 1);
 }

@@ -35,6 +35,7 @@ void drawTwoBytes(byte value1, byte value2) {
    drawByteOnTwoDigits(value1, FIRST_DIGIT_INDEX);
    drawByteOnTwoDigits(value2, THIRD_DIGIT_INDEX);
    matrix.drawColon(true);
+   matrix.writeDisplay();
 }
 
 int drawDigit(int value, int base, byte index, bool clearDigit) {
@@ -83,4 +84,9 @@ void showDone() {
   matrix.writeDigitRaw(THIRD_DIGIT_INDEX, LED_N);    
   matrix.writeDigitRaw(FOURTH_DIGIT_INDEX, LED_E);  
   matrix.writeDisplay();  
+}
+
+void hideColon() {
+  matrix.drawColon(false);
+  matrix.writeDisplay();
 }

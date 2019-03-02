@@ -25,4 +25,6 @@ void stopBlink();
 
 void showDone();
 
+void hideColon();
+
 #endif
