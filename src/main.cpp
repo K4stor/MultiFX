@@ -275,7 +275,6 @@ void setup() {
   setupDisplay();
   setupButtons();
   setupEncoders();
-  drawNumber(currentPresetNumber);
   transitionToStart();
   // anEeprom.write8(1, 123);
   // byte by = anEeprom.read8(1);
@@ -292,13 +291,13 @@ void transitionToOpenPreset() {
   dotIndex = DI_NONE;
   startBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber);
   muteEvents = false;
-  drawNumber(currentPresetNumber);
+  drawNumber(currentPresetNumber + 1);
 }
 
 void updatePresetToOpen() {
-  drawNumber(presetEncoderValue);
+  drawNumber(presetEncoderValue + 1);
 }
 
 void openSelected() {
@@ -313,9 +312,9 @@ void openSelected() {
 void transitionToStart() {
   dotIndex = DI_NONE;
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber);
   muteEvents = false;
-  drawNumber(currentPresetNumber);
+  drawNumber(currentPresetNumber + 1);
 }
 
 void transitionToEditParam1() {
@@ -364,14 +363,14 @@ void transitionToSavePreset() {
   dotIndex = DI_NONE;
   startBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber + 1);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber);
   muteEvents = false;
 
-  drawNumber(currentPresetNumber);
+  drawNumber(currentPresetNumber + 1);
 }
 
 void updatePresetToSave() {
-  drawNumber(presetEncoderValue);
+  drawNumber(presetEncoderValue + 1);
 }
 
 void saveSelected() {
