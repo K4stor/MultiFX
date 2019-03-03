@@ -219,7 +219,7 @@ void updateButtonStates() {
 
 // ------------------- Encoders -> Event
 void onPresetEncoderChange(int newValue) {
-  presetEncoderValue = newValue > 0 ? newValue : 1;
+  presetEncoderValue = newValue;
   Serial.println(param1ButtonState);
   if (param1ButtonState == HIGH) {
     handleEvent(turnPreset);
@@ -270,6 +270,11 @@ void setupSetupMemory() {
   if (!isMemoryInitialized()) {
     factoryReset();
   }
+  currentPreset.loadFrom(0);
+}
+
+void createInitialPinState() {
+  writeProgramPins(currentPreset.program);
 }
 
 void setup() {
@@ -280,6 +285,7 @@ void setup() {
   setupDisplay();
   setupButtons();
   setupEncoders();
+  createInitialPinState();
   transitionToStart();
 }
 
@@ -395,6 +401,7 @@ void transitionToEditProgram() {
 
 void updateProgram() {
   currentPreset.program = presetEncoderValue;
+  writeProgramPins(currentPreset.program);
   drawNumber(currentPreset.program + 1);
 }
 

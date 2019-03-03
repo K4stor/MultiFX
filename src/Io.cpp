@@ -73,5 +73,11 @@ void readPresetData(byte index) {
 }
 
 void readMidiMap() {
-  
+
+}
+
+void writeProgramPins(byte program) {
+  digitalWrite(S0_PIN, (program & 1));
+  digitalWrite(S1_PIN, (program & 2));
+  digitalWrite(S2_PIN, (program & 4));
 }
