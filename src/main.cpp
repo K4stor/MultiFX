@@ -5,10 +5,9 @@
 #include <Adafruit_GFX.h>
 #include <IoAbstraction.h>
 #include <IoAbstractionWire.h>
-#include <EepromAbstraction.h>
-#include <EepromAbstractionWire.h>
 #include "ApplicationModel.h"
 #include "DisplayHelpers.h"
+#include "Io.h"
 
 // PINS
 const int presetButtonPin = 8;
@@ -17,6 +16,7 @@ const int param1ButtonPin = 7;
 #define MAX_PRESET_ENCODER_VALUE 31
 #define MAX_PARAMETER_ENCODER_VALUE 127
 #define MAX_PROGRAM_ENCODER_VALUE 7
+#define DONE_DISPLAY_TIME 300
 
 // Button states  HIGH means NOT pressed down.
 int param1ButtonState = HIGH;
@@ -31,8 +31,6 @@ HardwareRotaryEncoder *presetEncoder;
 HardwareRotaryEncoder *param1Encoder;
 HardwareRotaryEncoder *param2Encoder;
 HardwareRotaryEncoder *param3Encoder;
-
-I2cAt24Eeprom anEeprom(0x50, 32);
 
 // foreward declaration of change handlers
 void onPresetEncoderChange(int newValue);
@@ -268,17 +266,21 @@ void setupButtons() {
   pinMode(presetButtonPin, INPUT);
 }
 
+void setupSetupMemory() {
+  if (!isMemoryInitialized()) {
+    factoryReset();
+  }
+}
+
 void setup() {
   Serial.begin(9600); // open the serial port at 9600 bps:
   Wire.begin();
 
+  setupSetupMemory();
   setupDisplay();
   setupButtons();
   setupEncoders();
   transitionToStart();
-  // anEeprom.write8(1, 123);
-  // byte by = anEeprom.read8(1);
-  // Serial.println(by);
 }
 
 void loop() {
@@ -305,7 +307,7 @@ void openSelected() {
   currentPreset.loadFrom(currentPresetNumber);
   stopBlink();
   showDone();
-  delay(200);
+  delay(DONE_DISPLAY_TIME);
   handleEvent(operationFinished);
 }
 
@@ -378,7 +380,7 @@ void saveSelected() {
   currentPreset.saveTo(currentPresetNumber);
   stopBlink();
   showDone();
-  delay(200);
+  delay(DONE_DISPLAY_TIME);
   handleEvent(operationFinished);
 }
 
@@ -409,12 +411,16 @@ void transitionToEditMidiMapping() {
 void saveEditedMidiMapping() {
   hideColon();
   saveMidiMap();
+  showDone();
+  delay(DONE_DISPLAY_TIME);
   handleEvent(operationFinished);
 }
 
 void resetEditedMidiMapping() {
   hideColon();
   restoreMidiMap();
+  showDone();
+  delay(DONE_DISPLAY_TIME);
   handleEvent(operationFinished);
 }
 
