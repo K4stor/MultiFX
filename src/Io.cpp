@@ -76,6 +76,12 @@ void readMidiMap() {
 
 }
 
+void setupProgramPins() {
+  pinMode(S0_PIN, OUTPUT);
+  pinMode(S1_PIN, OUTPUT);
+  pinMode(S2_PIN, OUTPUT);
+}
+
 void writeProgramPins(byte program) {
   digitalWrite(S0_PIN, (program & 1));
   digitalWrite(S1_PIN, (program & 2));
