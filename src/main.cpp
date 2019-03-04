@@ -180,7 +180,6 @@ void updateParam1ButtonState() {
     }
     else {
       // was LOW before therefore user just pressed it down
-      Serial.println("Gettin down");
       presetTurnedWhileParam1Down = false;
     }
   }
@@ -220,7 +219,6 @@ void updateButtonStates() {
 // ------------------- Encoders -> Event
 void onPresetEncoderChange(int newValue) {
   presetEncoderValue = newValue;
-  Serial.println(param1ButtonState);
   if (param1ButtonState == HIGH) {
     handleEvent(turnPreset);
   }
@@ -311,6 +309,7 @@ void updatePresetToOpen() {
 void openSelected() {
   currentPresetNumber = presetEncoderValue;
   currentPreset.loadFrom(currentPresetNumber);
+  Serial.println(currentPreset.param1);
   stopBlink();
   showDone();
   delay(DONE_DISPLAY_TIME);
@@ -329,7 +328,7 @@ void transitionToEditParam1() {
   dotIndex = DI_FIRST;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param1);
+  param1Encoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param1);
   muteEvents = false;
   drawNumber(currentPreset.param1);
 }
@@ -338,7 +337,7 @@ void transitionToEditParam2() {
   dotIndex = DI_SECOND;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param2);
+  param2Encoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param2);
   muteEvents = false;
   drawNumber(currentPreset.param2);
 }
@@ -347,7 +346,7 @@ void transitionToEditParam3() {
   dotIndex = DI_THIRD;
   stopBlink();
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param3);
+  param3Encoder->changePrecision(MAX_PARAMETER_ENCODER_VALUE, currentPreset.param3);
   muteEvents = false;
   drawNumber(currentPreset.param3);
 }

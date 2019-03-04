@@ -24,5 +24,5 @@ void saveMidiMap() {
 }
 
 void restoreMidiMap() {
-
+  readMidiMap();
 }

@@ -43,6 +43,8 @@ void writePresetData(Preset preset, byte index) {
   int offset = SIGNATURE_LENGTH + index * PRESET_LENGTH;
 
   #ifdef EMULATE_EEPROM
+  Serial.print("writing ");
+  Serial.println(preset.param1);
   memory[offset] = preset.program;
   memory[offset + 1] = preset.param1;
   memory[offset + 2] = preset.param2;
@@ -69,10 +71,20 @@ void readPresetData(byte index) {
   currentPreset.param1 = memory[offset + 1];
   currentPreset.param2 = memory[offset + 2];
   currentPreset.param3 = memory[offset + 3];
+  Serial.print("reading ");
+  Serial.println(currentPreset.param1);
   #endif
 }
 
 void readMidiMap() {
+  int offset = SIGNATURE_LENGTH + PRESET_LENGTH * PRESET_COUNT;
+  #ifdef EMULATE_EEPROM
+  // write midi map
+  for (int i = 0; i < PRESET_COUNT; i++) {
+    midiMap[i] = memory[offset];
+    offset++;
+  }
+  #endif
 
 }
 
