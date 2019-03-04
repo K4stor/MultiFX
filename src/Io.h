@@ -23,4 +23,7 @@ void readMidiMap();
 void setupProgramPins();
 void writeProgramPins(byte program);
 
+void writeLastUsedPresetIndex(byte index);
+byte readLastUsedPresetIndex();
+
 #endif

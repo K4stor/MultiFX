@@ -255,7 +255,8 @@ void setupEncoders() {
   switches.setEncoder(1, param1Encoder);
 
   muteEvents = true;
-  switches.changeEncoderPrecision(0, MAX_PRESET_ENCODER_VALUE, 0);
+  byte lastUsedPresetIndex = readLastUsedPresetIndex();
+  switches.changeEncoderPrecision(0, MAX_PRESET_ENCODER_VALUE, lastUsedPresetIndex);
   switches.changeEncoderPrecision(1, MAX_PARAMETER_ENCODER_VALUE, 0);
   muteEvents = false;
 }
@@ -268,7 +269,8 @@ void setupSetupMemory() {
   if (!isMemoryInitialized()) {
     factoryReset();
   }
-  currentPreset.loadFrom(0);
+  byte lastUsedPresetIndex = readLastUsedPresetIndex();
+  currentPreset.loadFrom(lastUsedPresetIndex);
 }
 
 void createInitialPinState() {
@@ -309,7 +311,7 @@ void updatePresetToOpen() {
 void openSelected() {
   currentPresetNumber = presetEncoderValue;
   currentPreset.loadFrom(currentPresetNumber);
-  Serial.println(currentPreset.param1);
+  writeLastUsedPresetIndex(currentPresetNumber);
   stopBlink();
   showDone();
   delay(DONE_DISPLAY_TIME);
