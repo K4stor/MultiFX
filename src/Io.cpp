@@ -3,7 +3,7 @@
 #include <EepromAbstractionWire.h>
 
 
-#define EMULATE_EEPROM // for development I use ram. That way the eeprom wont ware off.
+//#define EMULATE_EEPROM // for development I use ram. That way the eeprom wont ware off.
 
 #ifdef EMULATE_EEPROM
 byte memory[200];
@@ -13,7 +13,10 @@ I2cAt24Eeprom eeprom(0x50, 32);
 
 bool isMemoryInitialized() {
   #ifdef EMULATE_EEPROM
-  return memory[0] == 'M' && memory[1] == 'F' && memory[2] == 'X'; 
+  return memory[0] == 'M' && memory[1] == 'F' && memory[2] == 'X';
+  #else
+  //Serial.println(eeprom.read8(1));
+  return eeprom.read8(0) == 'M' && eeprom.read8(1) == 'F' && eeprom.read8(2) == 'X';
   #endif
 }
 
@@ -23,20 +26,24 @@ void factoryReset() {
   memory[0] = 'M';
   memory[1] = 'F';  
   memory[2] = 'X';
+  #else
+  eeprom.write8(0, 'M');
+  eeprom.write8(1, 'F');
+  eeprom.write8(2, 'X');
+  #endif
     
   Preset emptyPreset;
   
-  // write presets
   for (int i = 0; i < PRESET_COUNT; i++) {
     writePresetData(emptyPreset, i);
   }
 
-  // write midi map
+  // reset midi map
   for (int i = 0; i < PRESET_COUNT; i++) {
-    memory[i] = midiMap[i];
+    midiMap[i] = i;
   }
 
-  #endif
+  writeMidiMapping();
 }
 
 void writePresetData(Preset preset, byte index) {
@@ -47,18 +54,25 @@ void writePresetData(Preset preset, byte index) {
   memory[offset + 1] = preset.param1;
   memory[offset + 2] = preset.param2;
   memory[offset + 3] = preset.param3;
+  #else 
+  eeprom.write8(offset, preset.program);
+  eeprom.write8(offset + 1, preset.param1);
+  eeprom.write8(offset + 2, preset.param2);
+  eeprom.write8(offset + 3, preset.param3);
   #endif
 }
 
 void writeMidiMapping() {
   int offset = SIGNATURE_LENGTH + PRESET_LENGTH * PRESET_COUNT;
-  #ifdef EMULATE_EEPROM
   // write midi map
   for (int i = 0; i < PRESET_COUNT; i++) {
+    #ifdef EMULATE_EEPROM
     memory[offset] = midiMap[i];
+    #else
+    eeprom.write8(offset, midiMap[i]);
+    #endif
     offset++;
   }
-  #endif
 }
 
 void readPresetData(byte index) {
@@ -69,18 +83,25 @@ void readPresetData(byte index) {
   currentPreset.param1 = memory[offset + 1];
   currentPreset.param2 = memory[offset + 2];
   currentPreset.param3 = memory[offset + 3];
+  #else
+  currentPreset.program = eeprom.read8(offset);
+  currentPreset.param1 = eeprom.read8(offset + 1);
+  currentPreset.param2 = eeprom.read8(offset + 2);
+  currentPreset.param3 = eeprom.read8(offset + 3);
   #endif
 }
 
 void readMidiMap() {
   int offset = SIGNATURE_LENGTH + PRESET_LENGTH * PRESET_COUNT;
-  #ifdef EMULATE_EEPROM
-  // write midi map
+  // read midi map
   for (int i = 0; i < PRESET_COUNT; i++) {
+    #ifdef EMULATE_EEPROM
     midiMap[i] = memory[offset];
+    #else
+    midiMap[i] = eeprom.read8(offset);
+    #endif
     offset++;
   }
-  #endif
 }
 
 void writeLastUsedPresetIndex(byte index) {
@@ -88,6 +109,8 @@ void writeLastUsedPresetIndex(byte index) {
   int offset = SIGNATURE_LENGTH + PRESET_LENGTH * PRESET_COUNT + PRESET_COUNT;
   #ifdef EMULATE_EEPROM
   memory[offset] = index;
+  #else 
+  eeprom.write8(offset, index);
   #endif
 }
 
@@ -96,6 +119,8 @@ byte readLastUsedPresetIndex() {
   int offset = SIGNATURE_LENGTH + PRESET_LENGTH * PRESET_COUNT + PRESET_COUNT;
   #ifdef EMULATE_EEPROM
   return memory[offset];
+  #else
+  return eeprom.read8(offset);
   #endif
 }
 

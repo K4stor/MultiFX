@@ -266,8 +266,11 @@ void setupButtons() {
 }
 
 void setupSetupMemory() {
-  if (!isMemoryInitialized()) {
+   if (!isMemoryInitialized()) {
+    Serial.println("Nust clean");
     factoryReset();
+  } else {
+    Serial.println("no clean today");
   }
   byte lastUsedPresetIndex = readLastUsedPresetIndex();
   currentPreset.loadFrom(lastUsedPresetIndex);
