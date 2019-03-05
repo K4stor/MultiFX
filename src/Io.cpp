@@ -2,8 +2,7 @@
 #include <EepromAbstraction.h>
 #include <EepromAbstractionWire.h>
 
-
-//#define EMULATE_EEPROM // for development I use ram. That way the eeprom wont ware off.
+#define EMULATE_EEPROM // for development I use ram. That way the eeprom wont ware off.
 
 #ifdef EMULATE_EEPROM
 byte memory[200];
@@ -15,7 +14,6 @@ bool isMemoryInitialized() {
   #ifdef EMULATE_EEPROM
   return memory[0] == 'M' && memory[1] == 'F' && memory[2] == 'X';
   #else
-  //Serial.println(eeprom.read8(1));
   return eeprom.read8(0) == 'M' && eeprom.read8(1) == 'F' && eeprom.read8(2) == 'X';
   #endif
 }
@@ -134,4 +132,41 @@ void writeProgramPins(byte program) {
   digitalWrite(S0_PIN, (program & 1));
   digitalWrite(S1_PIN, (program & 2));
   digitalWrite(S2_PIN, (program & 4));
+}
+
+void setupPWNPins() {
+  pinMode(POT0_PIN, OUTPUT);
+  pinMode(POT1_PIN, OUTPUT);
+  pinMode(POT2_PIN, OUTPUT);
+  TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM10);
+  TCCR1B = _BV(WGM12) | _BV(CS10);
+  TCCR2A = _BV(WGM20) | _BV(COM2A1) | _BV(WGM21) | _BV(CS20);
+  
+  // Reset parameter pins
+  OCR1A = 0;
+  OCR1B = 0;
+  OCR2A = 0;
+}
+
+byte remapValue(byte value) {
+  // scale to 0..1
+  double normalizedValue = (double)value / 127.0;
+  double scaledValue = floor(normalizedValue * 255.0);
+  return (byte)scaledValue;
+}
+
+void writeParam1Pin(byte value) {
+  byte mappedValue = remapValue(value);
+  Serial.println(mappedValue);
+  OCR1A = mappedValue;
+}
+
+void writeParam2Pin(byte value) {
+  byte mappedValue = remapValue(value);
+  OCR1B = mappedValue;
+}
+
+void writeParam3Pin(byte value) {
+  byte mappedValue = remapValue(value);
+  OCR2A = mappedValue;
 }

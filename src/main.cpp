@@ -9,10 +9,6 @@
 #include "DisplayHelpers.h"
 #include "Io.h"
 
-// PINS
-const int presetButtonPin = 8;
-const int param1ButtonPin = 7;
-
 #define MAX_PRESET_ENCODER_VALUE 31
 #define MAX_PARAMETER_ENCODER_VALUE 127
 #define MAX_PROGRAM_ENCODER_VALUE 7
@@ -169,7 +165,7 @@ void handleEvent(Event event) {
 
 // ------------------- Buttons -> Event
 void updateParam1ButtonState() {
-  int buttonState = digitalRead(param1ButtonPin);
+  int buttonState = digitalRead(PARAM1_BUTTON_PIN);
   if (buttonState != param1ButtonState) {
     param1ButtonState = buttonState;
     // was LOW before therefore user just lifted it up
@@ -186,7 +182,7 @@ void updateParam1ButtonState() {
 }
 
 void updatePresetButtonState() {
-  int buttonState = digitalRead(presetButtonPin);
+  int buttonState = digitalRead(PRESET_BUTTON_PIN);
   if (buttonState != presetButtonState) {
     presetButtonState = buttonState;
     if (presetButtonState == HIGH) {
@@ -262,7 +258,7 @@ void setupEncoders() {
 }
 
 void setupButtons() {
-  pinMode(presetButtonPin, INPUT);
+  pinMode(PRESET_BUTTON_PIN, INPUT);
 }
 
 void setupSetupMemory() {
@@ -278,12 +274,17 @@ void setupSetupMemory() {
 
 void createInitialPinState() {
   writeProgramPins(currentPreset.program);
+  writeParam1Pin(currentPreset.param1);
+  writeParam2Pin(currentPreset.param2);
+  writeParam3Pin(currentPreset.param3);
 }
 
 void setup() {
   Serial.begin(9600); // open the serial port at 9600 bps:
   Wire.begin();
 
+  setupProgramPins();
+  setupPWNPins();
   setupSetupMemory();
   setupDisplay();
   setupButtons();
@@ -314,6 +315,7 @@ void updatePresetToOpen() {
 void openSelected() {
   currentPresetNumber = presetEncoderValue;
   currentPreset.loadFrom(currentPresetNumber);
+  createInitialPinState();
   writeLastUsedPresetIndex(currentPresetNumber);
   stopBlink();
   showDone();
@@ -358,16 +360,19 @@ void transitionToEditParam3() {
 
 void updateParam1() {
   currentPreset.param1 = param1EncoderValue;
+  writeParam1Pin(currentPreset.param1);
   drawNumber(currentPreset.param1);
 }
 
 void updateParam2() {
   currentPreset.param2 = param2EncoderValue;
+  writeParam2Pin(currentPreset.param2);
   drawNumber(currentPreset.param2);
 }
 
 void updateParam3() {
   currentPreset.param3 = param3EncoderValue;
+  writeParam3Pin(currentPreset.param3);
   drawNumber(currentPreset.param3);
 }
 
