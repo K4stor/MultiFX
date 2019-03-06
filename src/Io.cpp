@@ -150,7 +150,7 @@ void setupPWNPins() {
 
 byte remapValue(byte value) {
   // scale to 0..1
-  double normalizedValue = (double)value / 127.0;
+  double normalizedValue = (double)value / 255.0;
   double scaledValue = floor(normalizedValue * 255.0);
   return (byte)scaledValue;
 }
