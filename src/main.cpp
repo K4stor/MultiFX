@@ -5,6 +5,7 @@
 #include <Adafruit_GFX.h>
 #include <IoAbstraction.h>
 #include <IoAbstractionWire.h>
+#include <MIDI.h>
 #include "ApplicationModel.h"
 #include "DisplayHelpers.h"
 #include "Io.h"
@@ -13,6 +14,8 @@
 #define MAX_PARAMETER_ENCODER_VALUE 255
 #define MAX_PROGRAM_ENCODER_VALUE 7
 #define DONE_DISPLAY_TIME 300
+
+MIDI_CREATE_DEFAULT_INSTANCE();
 
 // Button states  HIGH means NOT pressed down.
 int param1ButtonState = HIGH;
@@ -47,7 +50,8 @@ enum State {
   openSelectedPreset,
   saveSelectedPreset,
   saveMidiMapping,
-  restoreMidiMapping
+  restoreMidiMapping,
+  processMidiData
 };
 
 enum Event {
@@ -61,7 +65,8 @@ enum Event {
   longPressPreset,
   longPressPresetWithParam1Pressed,
   operationFinished,
-  timer
+  timer,
+  midiProgramCommand
 };
 
 struct Transition {
@@ -92,6 +97,7 @@ void saveEditedMidiMapping();
 void resetEditedMidiMapping();
 void updateMidiFromParameter();
 void updateMidiToParameter();
+void openPresetFromMidi();
 
 struct Transition transitions[] = {
     // branching from start
@@ -102,6 +108,7 @@ struct Transition transitions[] = {
     {start, longPressPreset, selectPresetToSave, transitionToSavePreset},
     {start, longPressPresetWithParam1Pressed, editMidiMapping, transitionToEditMidiMapping},
     {start, turnPresetWithParam1Pressed, editProgram, transitionToEditProgram},
+    {start, midiProgramCommand, processMidiData,  openPresetFromMidi},
 
     // branching from selectPresetToOpen
     {selectPresetToOpen, turnPreset, selectPresetToOpen, updatePresetToOpen},
@@ -142,7 +149,9 @@ struct Transition transitions[] = {
     {editMidiMapping, longPressPreset, saveMidiMapping, saveEditedMidiMapping},
 
     {restoreMidiMapping, operationFinished, start, transitionToStart},
-    {saveMidiMapping, operationFinished, start, transitionToStart}
+    {saveMidiMapping, operationFinished, start, transitionToStart},
+
+    {openPresetFromMidi, operationFinished, openSelectedPreset, openSelected}
 };
 
 State currentState = start;
@@ -212,6 +221,11 @@ void updateButtonStates() {
   updatePresetButtonState();
 }
 
+void handleProgramChange(byte channel, byte number) {
+  receivedMidiProgrammIndex = number;
+  handleEvent(midiProgramCommand);
+}
+
 // ------------------- Encoders -> Event
 void onPresetEncoderChange(int newValue) {
   presetEncoderValue = newValue;
@@ -279,6 +293,11 @@ void createInitialPinState() {
   writeParam3Pin(currentPreset.param3);
 }
 
+void setupMidi() {
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  MIDI.setHandleProgramChange(handleProgramChange);
+}
+
 void setup() {
   Serial.begin(9600); // open the serial port at 9600 bps:
   Wire.begin();
@@ -289,6 +308,7 @@ void setup() {
   setupDisplay();
   setupButtons();
   setupEncoders();
+  setupMidi();
   createInitialPinState();
   transitionToStart();
 }
@@ -451,4 +471,11 @@ void updateMidiFromParameter() {
 void updateMidiToParameter() {
   midiMap[currentMidiMappingIndex] = presetEncoderValue; 
   drawTwoBytes(currentMidiMappingIndex + 1, midiMap[currentMidiMappingIndex] + 1);
+}
+
+void openPresetFromMidi() {
+  muteEvents = true;
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, receivedMidiProgrammIndex);
+  muteEvents = false;
+  handleEvent(operationFinished);
 }
