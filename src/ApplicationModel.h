@@ -22,6 +22,7 @@ extern byte presetEncoderValue;
 extern byte param1EncoderValue;
 extern byte param2EncoderValue;
 extern byte param3EncoderValue;
+extern byte receivedMidiProgrammIndex;
 
 void saveMidiMap();
 void restoreMidiMap();

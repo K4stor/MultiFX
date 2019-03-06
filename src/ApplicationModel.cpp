@@ -10,6 +10,7 @@ byte param1EncoderValue = 0;
 byte param2EncoderValue = 0;
 byte param3EncoderValue = 0;
 byte currentMidiMappingIndex = 0;
+byte receivedMidiProgrammIndex = 0;
 
 void Preset::saveTo(byte index) {
   writePresetData(currentPreset, index);

@@ -151,7 +151,7 @@ struct Transition transitions[] = {
     {restoreMidiMapping, operationFinished, start, transitionToStart},
     {saveMidiMapping, operationFinished, start, transitionToStart},
 
-    {openPresetFromMidi, operationFinished, openSelectedPreset, openSelected}
+    {processMidiData , operationFinished, openSelectedPreset, openSelected}
 };
 
 State currentState = start;
