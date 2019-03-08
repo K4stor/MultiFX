@@ -316,6 +316,7 @@ void setup() {
 void loop() {
   updateButtonStates();
   taskManager.runLoop();
+  MIDI.read();
 }
 
 // -------------------- Event handler
@@ -338,8 +339,6 @@ void openSelected() {
   createInitialPinState();
   writeLastUsedPresetIndex(currentPresetNumber);
   stopBlink();
-  showDone();
-  delay(DONE_DISPLAY_TIME);
   handleEvent(operationFinished);
 }
 
@@ -475,7 +474,7 @@ void updateMidiToParameter() {
 
 void openPresetFromMidi() {
   muteEvents = true;
-  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, receivedMidiProgrammIndex);
+  presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, midiMap[receivedMidiProgrammIndex]);
   muteEvents = false;
   handleEvent(operationFinished);
 }
