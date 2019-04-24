@@ -304,6 +304,7 @@ void setupMidi() {
 
 void setup() {
   Serial.begin(9600); // open the serial port at 9600 bps:
+  while (! Serial);
   Wire.begin();
   setupProgramPins();
   setupPWNPins();
@@ -347,6 +348,7 @@ void openSelected() {
 
 void transitionToStart() {
   dotIndex = DI_NONE;
+  stopBlink();
   muteEvents = true;
   presetEncoder->changePrecision(MAX_PRESET_ENCODER_VALUE, currentPresetNumber);
   muteEvents = false;
