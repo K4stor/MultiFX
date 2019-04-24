@@ -1,6 +1,6 @@
 {
   "terminal.integrated.env.osx": {
-    "PATH": "/Users/Kastor/.platformio/penv/bin:/Users/Kastor/.platformio/penv:/Users/Kastor/.local/bin/luna-studio:/Applications/x64.app/Contents/MacOS/x64:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/share/dotnet:/opt/X11/bin:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/Kastor/.nvm/versions/node/v5.0.0/bin:/Users/Kastor/torch/install/bin:/Developer/NVIDIA/CUDA-7.0/bin:/usr/local/texlive/2017/bin/x86_64-darwin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/Kastor/Development/go.bin",
+    "PATH": "/Users/Kastor/.platformio/penv/bin:/Users/Kastor/.platformio/penv:/Users/Kastor/.local/bin/luna-studio:/Applications/x64.app/Contents/MacOS/x64:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/share/dotnet:/opt/X11/bin:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/opt/ImageMagick/bin:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/Kastor/.nvm/versions/node/v5.0.0/bin:/Users/Kastor/torch/install/bin:/Developer/NVIDIA/CUDA-7.0/bin:/usr/local/texlive/2017/bin/x86_64-darwin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/Kastor/Development/go.bin",
     "PLATFORMIO_CALLER": "vscode"
   }
 }

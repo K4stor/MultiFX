@@ -125,11 +125,11 @@ struct Transition transitions[] = {
     {editParameter1, pressParam1, start, transitionToStart},
 
     // branching from editParameter2
-    {editParameter2, turnParam2, editParameter2, updateParam1},
+    {editParameter2, turnParam2, editParameter2, updateParam2},
     {editParameter2, pressParam1, start, transitionToStart},
 
     // branching from editParameter3
-    {editParameter3, turnParam3, editParameter3, updateParam1},
+    {editParameter3, turnParam3, editParameter3, updateParam3},
     {editParameter3, pressParam1, start, transitionToStart},
 
     // branching from openSelectedPreset
@@ -263,11 +263,15 @@ void setupEncoders() {
 
   switches.setEncoder(0, presetEncoder);
   switches.setEncoder(1, param1Encoder);
+  switches.setEncoder(2, param2Encoder);
+  switches.setEncoder(3, param3Encoder);
 
   muteEvents = true;
   byte lastUsedPresetIndex = readLastUsedPresetIndex();
   switches.changeEncoderPrecision(0, MAX_PRESET_ENCODER_VALUE, lastUsedPresetIndex);
   switches.changeEncoderPrecision(1, MAX_PARAMETER_ENCODER_VALUE, 0);
+  switches.changeEncoderPrecision(2, MAX_PARAMETER_ENCODER_VALUE, 0);
+  switches.changeEncoderPrecision(3, MAX_PARAMETER_ENCODER_VALUE, 0);
   muteEvents = false;
 }
 
@@ -301,7 +305,6 @@ void setupMidi() {
 void setup() {
   Serial.begin(9600); // open the serial port at 9600 bps:
   Wire.begin();
-
   setupProgramPins();
   setupPWNPins();
   setupSetupMemory();
